@@ -1,0 +1,49 @@
+# Logs & Temporary Files
+*.log
+*.sqlite
+*.sqlite-*
+.DS_Store
+Thumbs.db
+.phpunit.result.cache
+/.phpunit.cache
+_ide_helper.php
+
+# Environment & Secrets (Keep only public templates)
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# IDE & Editor Configs
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.vscode
+/.zed
+.phpactor.json
+Homestead.json
+Homestead.yaml
+
+# Dependencies
+/node_modules
+/vendor
+/auth.json
+
+# Build & Compiled Assets (public/build included for instant zero-config startup)
+/public/hot
+/public/storage
+/public/fonts-manifest.dev.json
+
+# Storage keys
+/storage/*.key
+/storage/pail
+
+# Private Docs, Cheatsheets & Test Materials
+/docs/
+dataset/
+*.pdf
+*.docx
+*.xlsx
+soal/
+cheatsheet/
