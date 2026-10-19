@@ -1,0 +1,1 @@
+var e=`data:image/svg+xml,`;export{e as default};

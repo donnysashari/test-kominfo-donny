@@ -207,4 +207,13 @@ class DeviceApiTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_root_serves_spa_view(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200)
+            ->assertSee('id="root"', false)
+            ->assertSee('Inventaris Perangkat TI');
+    }
 }
