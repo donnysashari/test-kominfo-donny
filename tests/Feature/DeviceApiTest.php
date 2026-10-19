@@ -216,4 +216,13 @@ class DeviceApiTest extends TestCase
             ->assertSee('id="root"', false)
             ->assertSee('Inventaris Perangkat TI');
     }
+
+    public function test_docs_serves_swagger_ui(): void
+    {
+        $response = $this->get('/docs');
+
+        $response->assertStatus(200)
+            ->assertSee('SwaggerUIBundle', false)
+            ->assertSee('openapi.json', false);
+    }
 }

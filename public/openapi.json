@@ -1,0 +1,419 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Inventaris Perangkat TI — Diskominfo Kota Probolinggo",
+    "description": "Dokumentasi spesifikasi RESTful API resmi untuk sistem pengelolaan inventaris perangkat TIK Diskominfo Pemerintah Kota Probolinggo. Mengikuti kaidah standar REST, model binding otomatis, dan validasi field.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Tim TIK Diskominfo Kota Probolinggo",
+      "email": "diskominfo@probolinggokota.go.id"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current Server Environment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Autentikasi",
+      "description": "Endpoint pengelolaan sesi kedinasan (Login, Logout, Session Check)"
+    },
+    {
+      "name": "Inventaris Perangkat TI",
+      "description": "Operasi CRUD inventaris perangkat keras TIK"
+    },
+    {
+      "name": "Kategori",
+      "description": "Daftar kategori perangkat dan statistik jumlah aset"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Login ke sistem",
+        "description": "Otentikasi kredensial email dan kata sandi kedinasan.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "admin@probolinggokota.go.id"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "password123"
+                  },
+                  "remember": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Login berhasil." },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Kredensial tidak valid",
+            "content": {
+              "application/json": {
+                "$ref": "#/components/schemas/ValidationError"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Logout dari sistem",
+        "description": "Menutup sesi pengguna yang sedang aktif.",
+        "responses": {
+          "200": {
+            "description": "Logout berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Logout berhasil." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Autentikasi"],
+        "summary": "Periksa status sesi pengguna",
+        "description": "Mengembalikan data pengguna yang sedang login atau null jika belum login.",
+        "responses": {
+          "200": {
+            "description": "Informasi pengguna aktif",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "nullable": true,
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": ["Kategori"],
+        "summary": "Daftar kategori perangkat",
+        "description": "Mengambil seluruh kategori beserta jumlah total perangkat terkait.",
+        "responses": {
+          "200": {
+            "description": "Daftar kategori berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Category" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/devices": {
+      "get": {
+        "tags": ["Inventaris Perangkat TI"],
+        "summary": "Daftar seluruh perangkat TI",
+        "description": "Mengambil semua perangkat TI terdaftar dengan relasi kategori.",
+        "responses": {
+          "200": {
+            "description": "Daftar perangkat berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Device" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Inventaris Perangkat TI"],
+        "summary": "Tambah perangkat baru",
+        "description": "Mendaftarkan perangkat TI baru ke dalam sistem inventaris.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeviceInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Perangkat berhasil ditambahkan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Device" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "$ref": "#/components/schemas/ValidationError"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/devices/{id}": {
+      "get": {
+        "tags": ["Inventaris Perangkat TI"],
+        "summary": "Detail satu perangkat",
+        "description": "Mengambil rincian data satu perangkat berdasarkan ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID perangkat",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail perangkat ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Device" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Perangkat tidak ditemukan"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Inventaris Perangkat TI"],
+        "summary": "Perbarui data perangkat",
+        "description": "Memperbarui data perangkat yang ada berdasarkan ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID perangkat",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeviceInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perangkat berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Device" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Perangkat tidak ditemukan"
+          },
+          "422": {
+            "description": "Validasi gagal",
+            "content": {
+              "application/json": {
+                "$ref": "#/components/schemas/ValidationError"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Inventaris Perangkat TI"],
+        "summary": "Hapus perangkat",
+        "description": "Menghapus perangkat dari database berdasarkan ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID perangkat",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data berhasil dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Data berhasil dihapus." }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Perangkat tidak ditemukan"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Administrator Diskominfo" },
+          "email": { "type": "string", "example": "admin@probolinggokota.go.id" }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Laptop" },
+          "device_count": { "type": "integer", "example": 5 }
+        }
+      },
+      "Device": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "asset_code": { "type": "string", "example": "IT1-001" },
+          "name": { "type": "string", "example": "Laptop administrasi" },
+          "brand": { "type": "string", "nullable": true, "example": "Lenovo ThinkPad" },
+          "serial_number": { "type": "string", "nullable": true, "example": "SN-982348" },
+          "category_id": { "type": "integer", "example": 1 },
+          "category_name": { "type": "string", "example": "Laptop" },
+          "status": {
+            "type": "string",
+            "enum": ["tersedia", "digunakan", "perbaikan"],
+            "example": "tersedia"
+          },
+          "status_label": { "type": "string", "example": "Tersedia" },
+          "assigned_to": { "type": "string", "nullable": true, "example": "Sekretariat" },
+          "purchase_date": { "type": "string", "format": "date", "nullable": true, "example": "2026-10-01" },
+          "purchase_price": { "type": "integer", "nullable": true, "example": 250000 },
+          "notes": { "type": "string", "nullable": true, "example": "Data inventaris perangkat TI Diskominfo." },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "DeviceInput": {
+        "type": "object",
+        "required": ["asset_code", "name", "category_id", "status"],
+        "properties": {
+          "asset_code": { "type": "string", "maxLength": 30, "example": "IT1-021" },
+          "name": { "type": "string", "maxLength": 255, "example": "Laptop Administrasi Baru" },
+          "brand": { "type": "string", "maxLength": 100, "example": "Dell Latitude" },
+          "serial_number": { "type": "string", "maxLength": 100, "example": "SN-DEL-021" },
+          "category_id": { "type": "integer", "example": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["tersedia", "digunakan", "perbaikan"],
+            "example": "tersedia"
+          },
+          "assigned_to": { "type": "string", "maxLength": 150, "example": "Unit Teknis" },
+          "purchase_date": { "type": "string", "format": "date", "example": "2026-10-19" },
+          "purchase_price": { "type": "integer", "minimum": 0, "example": 1250000 },
+          "notes": { "type": "string", "maxLength": 1000, "example": "Pengadaan perangkat baru Diskominfo" }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "Data yang diberikan tidak valid." },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "example": {
+              "asset_code": ["Kode aset sudah digunakan."]
+            }
+          }
+        }
+      }
+    }
+  }
+}
